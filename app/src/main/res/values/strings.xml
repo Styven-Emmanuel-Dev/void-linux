@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Void-Linux</string>
+
+    <!-- Navigation -->
+    <string name="nav_terminal">Terminal</string>
+    <string name="nav_linux">Linux</string>
+    <string name="nav_windows">Windows</string>
+    <string name="nav_tor">Tor</string>
+    <string name="nav_security">Sécurité</string>
+    <string name="nav_location">Localisation</string>
+    <string name="nav_settings">Réglages</string>
+
+    <!-- Linux -->
+    <string name="linux_title">Environnement Linux</string>
+    <string name="linux_status_ready">Kali Linux prêt</string>
+    <string name="linux_status_missing">Kali Linux non installé</string>
+    <string name="linux_install">Installer Kali Linux</string>
+    <string name="linux_uninstall">Désinstaller Kali</string>
+    <string name="linux_launch">Lancer Kali</string>
+    <string name="linux_installing">Installation en cours…</string>
+    <string name="linux_installed_ok">Kali Linux installé ✅</string>
+    <string name="linux_error">Erreur : %1$s</string>
+
+    <!-- Terminal -->
+    <string name="terminal_title">Terminal</string>
+    <string name="terminal_new_session">Nouvelle session</string>
+    <string name="terminal_close">Fermer</string>
+
+    <!-- Windows -->
+    <string name="windows_title">Environnement Windows</string>
+    <string name="windows_install_wine">Installer Wine</string>
+    <string name="windows_run_exe">Exécuter un .exe</string>
+
+    <!-- Tor -->
+    <string name="tor_title">Réseau Tor</string>
+    <string name="tor_installed">Orbot installé</string>
+    <string name="tor_missing">Orbot non installé</string>
+    <string name="tor_running">Tor actif ✅</string>
+    <string name="tor_stopped">Tor arrêté</string>
+    <string name="tor_enable">Activer Tor</string>
+    <string name="tor_disable">Désactiver Tor</string>
+    <string name="tor_install_orbot">Installer Orbot</string>
+    <string name="tor_browse_onion">Navigateur .onion</string>
+
+    <!-- Sécurité -->
+    <string name="security_title">Sécurité</string>
+    <string name="security_guard_active">Surveillance active</string>
+    <string name="security_guard_inactive">Surveillance inactive</string>
+    <string name="security_alert_apk">APK détecté : %1$s</string>
+    <string name="security_trust">Faire confiance</string>
+    <string name="security_block">Bloquer</string>
+    <string name="security_scan">Scanner</string>
+
+    <!-- Localisation -->
+    <string name="location_title">Localisation</string>
+    <string name="location_mock_enable">Activer la fausse position</string>
+    <string name="location_mock_disable">Désactiver</string>
+    <string name="location_guide">Guide d\'activation</string>
+
+    <!-- Paramètres -->
+    <string name="settings_title">Paramètres</string>
+    <string name="settings_hardening">Durcissement</string>
+    <string name="settings_permissions">Permissions</string>
+    <string name="settings_about">À propos</string>
+
+    <!-- Notifications -->
+    <string name="notif_channel_security">Alertes de sécurité</string>
+    <string name="notif_channel_system">Système</string>
+    <string name="notif_channel_install">Installations</string>
+    <string name="notif_foreground_title">Void-Linux actif</string>
+    <string name="notif_foreground_text">Surveillance et services en cours</string>
+</resources>
