@@ -1,40 +1,52 @@
-plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
-}
+package com.voidlinux.feature.linux
 
-android {
-    namespace = "com.voidlinux.feature.linux"
-    compileSdk = 34
+import com.voidlinux.core.common.Constants
 
-    defaultConfig {
-        minSdk = 29
-    }
+/**
+ * Catalogue des distributions Linux supportées.
+ */
+object DistroCatalog {
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
+    data class Distro(
+        val id: String,
+        val displayName: String,
+        val url: String,
+        val archiveName: String,
+        val defaultShell: String = "/bin/bash",
+        val defaultUser: String = "root"
+    )
 
-    kotlinOptions {
-        jvmTarget = "17"
-    }
+    val KALI = Distro(
+        id = Constants.DISTRO_KALI,
+        displayName = "Kali Linux",
+        url = Constants.KALI_ROOTFS_ARM64_URL,
+        archiveName = Constants.KALI_ROOTFS_ARM64_NAME,
+        defaultShell = "/bin/bash"
+    )
 
-    buildFeatures {
-        viewBinding = true
-    }
-}
+    val DEBIAN = Distro(
+        id = Constants.DISTRO_DEBIAN,
+        displayName = "Debian",
+        url = Constants.KALI_ROOTFS_ARM64_URL, // placeholder — remplacer par URL Debian
+        archiveName = "debian-arm64.tar.xz"
+    )
 
-dependencies {
-    implementation(project(":core:common"))
-    implementation(project(":core:designsystem"))
-    implementation(project(":library:proot-engine:proot-engine"))
+    val UBUNTU = Distro(
+        id = Constants.DISTRO_UBUNTU,
+        displayName = "Ubuntu",
+        url = Constants.KALI_ROOTFS_ARM64_URL, // placeholder
+        archiveName = "ubuntu-arm64.tar.xz"
+    )
 
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
-    implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.lifecycle.runtime)
-    implementation(libs.androidx.lifecycle.viewmodel)
-    implementation(libs.kotlinx.coroutines.android)
+    val ALPINE = Distro(
+        id = Constants.DISTRO_ALPINE,
+        displayName = "Alpine",
+        url = Constants.KALI_ROOTFS_ARM64_URL, // placeholder
+        archiveName = "alpine-arm64.tar.xz",
+        defaultShell = "/bin/ash"
+    )
+
+    val all = listOf(KALI, DEBIAN, UBUNTU, ALPINE)
+
+    fun byId(id: String): Distro? = all.firstOrNull { it.id == id }
 }
