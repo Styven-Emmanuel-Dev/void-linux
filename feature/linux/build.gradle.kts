@@ -1,30 +1,40 @@
-package com.voidlinux.core.native
+plugins {
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
+}
 
-object NativeBridge {
+android {
+    namespace = "com.voidlinux.feature.linux"
+    compileSdk = 34
 
-    init {
-        System.loadLibrary("voidlinux_jni")
+    defaultConfig {
+        minSdk = 29
     }
 
-    // --- Proot loader ---
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
 
-    external fun loadElf(path: String): Int
+    kotlinOptions {
+        jvmTarget = "17"
+    }
 
-    external fun checkWxSupported(): Int
+    buildFeatures {
+        viewBinding = true
+    }
+}
 
-    // --- PTY ---
+dependencies {
+    implementation(project(":core:common"))
+    implementation(project(":core:designsystem"))
+    implementation(project(":library:proot-engine:proot-engine"))
 
-    external fun createPty(cols: Int, rows: Int): IntArray?
-
-    external fun resizePty(fd: Int, cols: Int, rows: Int)
-
-    external fun closePty(fd: Int)
-
-    // --- Terminal ---
-
-    external fun execInPty(masterFd: Int, command: String): Int
-
-    external fun writeToPty(fd: Int, data: ByteArray): Int
-
-    external fun readFromPty(fd: Int, maxBytes: Int): ByteArray?
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.lifecycle.runtime)
+    implementation(libs.androidx.lifecycle.viewmodel)
+    implementation(libs.kotlinx.coroutines.android)
 }
