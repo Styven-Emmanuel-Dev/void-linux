@@ -1,6 +1,4 @@
 #!/bin/bash
-# Télécharge le rootfs Kali NetHunter.
-
 set -e
 
 ARCH="${1:-arm64}"
@@ -17,7 +15,6 @@ case "$ARCH" in
         ;;
     *)
         echo "[!] Architecture inconnue : $ARCH"
-        echo "[i] Utilise 'arm64' ou 'armhf'"
         exit 1
         ;;
 esac
@@ -29,7 +26,7 @@ if [ -f "$OUTPUT_DIR/$FILENAME" ]; then
     exit 0
 fi
 
-echo "[*] Téléchargement de $FILENAME depuis Kali…"
+echo "[*] Téléchargement de $FILENAME depuis Kali..."
 if curl -L --fail --retry 3 -o "$OUTPUT_DIR/$FILENAME" "$URL"; then
     echo "[✓] Rootfs téléchargé : $OUTPUT_DIR/$FILENAME"
     echo "[i] Taille : $(du -h "$OUTPUT_DIR/$FILENAME" | cut -f1)"
