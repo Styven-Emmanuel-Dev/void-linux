@@ -7,8 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.voidlinux.core.designsystem.Components
 import com.voidlinux.feature.tor.databinding.FragmentTorBinding
+import kotlinx.coroutines.launch
 
 class TorFragment : Fragment() {
 
@@ -31,16 +33,26 @@ class TorFragment : Fragment() {
 
         binding.startTor.setOnClickListener { viewModel.startTor() }
         binding.stopTor.setOnClickListener { viewModel.stopTor() }
-
-        binding.installOrbot.setOnClickListener {
-            openOrbotInstall()
-        }
-
+        binding.installOrbot.setOnClickListener { openOrbotInstall() }
         binding.openBrowser.setOnClickListener {
             startActivity(Intent(requireContext(), OnionBrowserActivity::class.java))
         }
 
-        observeState()
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.uiState.collect { state ->
+                binding.torStatus.text = state.statusMessage
+                binding.startTor.isEnabled = state.orbotInstalled && !state.torRunning
+                binding.stopTor.isEnabled = state.torRunning
+                binding.installOrbot.visibility =
+                    if (state.orbotInstalled) View.GONE else View.VISIBLE
+                binding.openBrowser.isEnabled = state.torRunning
+
+                state.errorMessage?.let { msg ->
+                    Components.showSnackLong(binding.root, msg)
+                    viewModel.clearError()
+                }
+            }
+        }
     }
 
     private fun openOrbotInstall() {
@@ -51,22 +63,6 @@ class TorFragment : Fragment() {
             startActivity(intent)
         } catch (e: Exception) {
             Components.showSnackLong(binding.root, "Impossible d'ouvrir le navigateur")
-        }
-    }
-
-    private fun observeState() {
-        viewModel.uiState.observe(viewLifecycleOwner) { state ->
-            binding.torStatus.text = state.statusMessage
-            binding.startTor.isEnabled = state.orbotInstalled && !state.torRunning
-            binding.stopTor.isEnabled = state.torRunning
-            binding.installOrbot.visibility =
-                if (state.orbotInstalled) View.GONE else View.VISIBLE
-            binding.openBrowser.isEnabled = state.torRunning
-
-            state.errorMessage?.let { msg ->
-                Components.showSnackLong(binding.root, msg)
-                viewModel.clearError()
-            }
         }
     }
 

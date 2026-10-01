@@ -7,8 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.voidlinux.core.designsystem.Components
 import com.voidlinux.feature.terminal.databinding.FragmentTerminalBinding
+import kotlinx.coroutines.launch
 
 class TerminalFragment : Fragment() {
 
@@ -33,21 +35,8 @@ class TerminalFragment : Fragment() {
         buffer = TerminalBuffer()
         binding.terminalView.buffer = buffer
 
-        setupTerminalView()
-        setupExtraKeys()
-        observeState()
-
-        viewModel.checkLinuxReady()
-    }
-
-    private fun setupTerminalView() {
-        binding.terminalView.onInput = { data ->
-            viewModel.writeInput(data)
-        }
-
-        binding.terminalView.onResize = { cols, rows ->
-            viewModel.resize(cols, rows)
-        }
+        binding.terminalView.onInput = { data -> viewModel.writeInput(data) }
+        binding.terminalView.onResize = { cols, rows -> viewModel.resize(cols, rows) }
 
         binding.terminalView.setOnKeyListener { _, keyCode, event ->
             if (event.action == KeyEvent.ACTION_DOWN) {
@@ -59,14 +48,11 @@ class TerminalFragment : Fragment() {
             }
             false
         }
-
         binding.terminalView.requestFocus()
-    }
 
-    private fun setupExtraKeys() {
         binding.keyEsc.setOnClickListener { viewModel.writeInput("\u001B") }
         binding.keyTab.setOnClickListener { viewModel.writeInput("\t") }
-        binding.keyCtrl.setOnClickListener { viewModel.writeInput("\u0003") } // Ctrl+C
+        binding.keyCtrl.setOnClickListener { viewModel.writeInput("\u0003") }
         binding.keyUp.setOnClickListener { viewModel.writeInput("\u001B[A") }
         binding.keyDown.setOnClickListener { viewModel.writeInput("\u001B[B") }
         binding.keyLeft.setOnClickListener { viewModel.writeInput("\u001B[D") }
@@ -74,29 +60,22 @@ class TerminalFragment : Fragment() {
 
         binding.keyStart.setOnClickListener {
             viewModel.startSession(buffer) { text ->
-                activity?.runOnUiThread {
-                    binding.terminalView.writeText(text)
+                activity?.runOnUiThread { binding.terminalView.writeText(text) }
+            }
+        }
+        binding.keyStop.setOnClickListener { viewModel.stopSession() }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.uiState.collect { state ->
+                if (!state.linuxReady) {
+                    binding.terminalView.writeText(
+                        "\r\n[Void-Linux] Terminal prêt.\r\n"
+                    )
                 }
-            }
-        }
-
-        binding.keyStop.setOnClickListener {
-            viewModel.stopSession()
-        }
-    }
-
-    private fun observeState() {
-        viewModel.uiState.observe(viewLifecycleOwner) { state ->
-            if (!state.linuxReady) {
-                binding.terminalView.writeText(
-                    "\r\n[Void-Linux] Kali Linux n'est pas installé.\r\n" +
-                    "Va dans l'onglet Linux pour l'installer.\r\n"
-                )
-            }
-
-            state.errorMessage?.let { msg ->
-                Components.showSnackLong(binding.root, msg)
-                viewModel.clearError()
+                state.errorMessage?.let { msg ->
+                    Components.showSnackLong(binding.root, msg)
+                    viewModel.clearError()
+                }
             }
         }
     }

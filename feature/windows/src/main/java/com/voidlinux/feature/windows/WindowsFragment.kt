@@ -11,8 +11,10 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.voidlinux.core.designsystem.Components
 import com.voidlinux.feature.windows.databinding.FragmentWindowsBinding
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 
@@ -48,7 +50,22 @@ class WindowsFragment : Fragment() {
         binding.stopExecution.setOnClickListener { viewModel.stopExecution() }
         binding.cleanWine.setOnClickListener { viewModel.cleanWine() }
 
-        observeState()
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.uiState.collect { state ->
+                binding.statusText.text = state.statusMessage
+                binding.archText.text = "Architecture : ${state.architecture}"
+                binding.outputText.text = state.output
+
+                binding.initWine.isEnabled = !state.wineReady
+                binding.runExe.isEnabled = state.box64Available && !state.running
+                binding.stopExecution.isEnabled = state.running
+
+                state.errorMessage?.let {
+                    Components.showSnackLong(binding.root, it)
+                    viewModel.clearError()
+                }
+            }
+        }
     }
 
     private fun openExePicker() {
@@ -63,13 +80,11 @@ class WindowsFragment : Fragment() {
         try {
             val name = queryName(uri) ?: "program.exe"
             val target = File(requireContext().cacheDir, name)
-
             requireContext().contentResolver.openInputStream(uri)?.use { input ->
                 FileOutputStream(target).use { output ->
                     input.copyTo(output, bufferSize = 64 * 1024)
                 }
             }
-
             viewModel.runExe(target)
         } catch (e: Exception) {
             Components.showSnackLong(binding.root, "Impossible de lire le fichier")
@@ -82,26 +97,7 @@ class WindowsFragment : Fragment() {
                 val idx = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
                 if (cursor.moveToFirst() && idx >= 0) cursor.getString(idx) else null
             }
-        } catch (e: Exception) {
-            null
-        }
-    }
-
-    private fun observeState() {
-        viewModel.uiState.observe(viewLifecycleOwner) { state ->
-            binding.statusText.text = state.statusMessage
-            binding.archText.text = "Architecture : ${state.architecture}"
-            binding.outputText.text = state.output
-
-            binding.initWine.isEnabled = !state.wineReady
-            binding.runExe.isEnabled = state.box64Available && !state.running
-            binding.stopExecution.isEnabled = state.running
-
-            state.errorMessage?.let {
-                Components.showSnackLong(binding.root, it)
-                viewModel.clearError()
-            }
-        }
+        } catch (e: Exception) { null }
     }
 
     override fun onResume() {
