@@ -13,7 +13,6 @@ dependencyResolutionManagement {
         mavenCentral()
         maven { url = uri("https://jitpack.io") }
         maven { url = uri("https://guardianproject.info/maven") }
-        maven { url = uri("https://dl.bintray.com/guardianproject/maven") }
     }
 }
 
@@ -23,6 +22,7 @@ include(":app")
 include(":core:common")
 include(":core:designsystem")
 include(":core:native")
+include(":core:data")
 include(":feature:linux")
 include(":feature:terminal")
 include(":feature:windows")

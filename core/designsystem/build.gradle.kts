@@ -25,5 +25,6 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
+    api("androidx.fragment:fragment-ktx:1.6.2")
     api(project(":core:common"))
 }

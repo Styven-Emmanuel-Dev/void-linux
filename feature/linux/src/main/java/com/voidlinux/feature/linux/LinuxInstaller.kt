@@ -5,20 +5,15 @@ import android.content.Context
 import androidx.core.app.NotificationCompat
 import com.voidlinux.core.common.Constants
 import com.voidlinux.core.common.VoidResult
-import io.oonid.proot.engine.ProotManager
-import io.oonid.proot.engine.ProotState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.net.HttpURLConnection
+import java.net.URL
 
-/**
- * Orchestre l'installation d'une distribution Linux.
- * Affiche la progression via notification.
- */
 class LinuxInstaller(
     private val context: Context,
-    private val host: LinuxHost,
-    private val prootManager: ProotManager
+    private val host: LinuxHost
 ) {
 
     private val notifier = InstallationNotifier(context)
@@ -28,46 +23,64 @@ class LinuxInstaller(
         onProgress: (Int) -> Unit = {}
     ): VoidResult<File> = withContext(Dispatchers.IO) {
 
-        if (!host.hasNativeBinaries()) {
-            return@withContext VoidResult.Error(
-                "Binaires proot natifs manquants. Vérifie library/proot-engine/src/main/jniLibs/"
-            )
-        }
-
         notifier.showStart(distro.displayName)
 
-        return@withContext try {
-            val rootfs = prootManager.install(
-                distro = distro.id,
-                url = distro.url,
-                archiveName = distro.archiveName
-            ) { progress ->
-                notifier.update(distro.displayName, progress)
-                onProgress(progress)
+        try {
+            val targetDir = host.rootfsFor(distro.id).apply { mkdirs() }
+            val archive = File(host.tmpDir, distro.archiveName)
+
+            if (!archive.exists() || archive.length() == 0L) {
+                downloadFile(distro.url, archive) { progress ->
+                    notifier.update(distro.displayName, progress)
+                    onProgress(progress)
+                }
             }
 
             notifier.showComplete(distro.displayName)
-            VoidResult.Success(rootfs)
+            VoidResult.Success(targetDir)
         } catch (e: Exception) {
             notifier.showError(distro.displayName, e.message ?: "Erreur inconnue")
-            VoidResult.Error("Échec de l'installation de ${distro.displayName}", e)
+            VoidResult.Error("Échec de l'installation", e)
         }
     }
 
-    fun isInstalled(distro: String): Boolean =
-        prootManager.isInstalled(distro)
+    private fun downloadFile(url: String, target: File, onProgress: (Int) -> Unit) {
+        val connection = URL(url).openConnection() as HttpURLConnection
+        connection.connectTimeout = 30_000
+        connection.readTimeout = 30_000
+        connection.connect()
+
+        val total = connection.contentLengthLong
+        var downloaded = 0L
+
+        connection.inputStream.use { input ->
+            target.outputStream().use { output ->
+                val buffer = ByteArray(64 * 1024)
+                var read: Int
+                while (input.read(buffer).also { read = it } != -1) {
+                    output.write(buffer, 0, read)
+                    downloaded += read
+                    if (total > 0) {
+                        onProgress(((downloaded * 100) / total).toInt())
+                    }
+                }
+            }
+        }
+        connection.disconnect()
+    }
+
+    fun isInstalled(distro: String): Boolean {
+        val dir = host.rootfsFor(distro)
+        return dir.exists() && File(dir, "bin").exists()
+    }
 
     fun uninstall(distro: String): Boolean =
-        prootManager.uninstall(distro)
+        host.rootfsFor(distro).deleteRecursively()
 }
 
-/**
- * Gère les notifications de progression d'installation.
- */
 private class InstallationNotifier(private val context: Context) {
 
-    private val manager =
-        context.getSystemService(NotificationManager::class.java)
+    private val manager = context.getSystemService(NotificationManager::class.java)
 
     fun showStart(distroName: String) {
         val notif = NotificationCompat.Builder(context, Constants.CHANNEL_INSTALL)

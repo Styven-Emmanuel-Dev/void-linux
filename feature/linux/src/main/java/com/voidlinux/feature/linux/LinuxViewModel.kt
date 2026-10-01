@@ -92,7 +92,7 @@ class LinuxViewModel(app: Application) : AndroidViewModel(app) {
             val ok = repo.uninstall(_uiState.value.distroId)
             _uiState.value = _uiState.value.copy(
                 installed = !ok,
-                statusMessage = if (ok) "Désinstallé" else "Échec de la désinstallation"
+                statusMessage = if (ok) "Désinstallé" else "Échec"
             )
             refresh()
         }
