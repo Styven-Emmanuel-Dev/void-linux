@@ -33,10 +33,7 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.constraintlayout)
-<<<<<<< HEAD
     implementation(libs.androidx.recyclerview)
-=======
->>>>>>> 5657826d0e16b81cb87f9483952d3a71c90a152a
     implementation(libs.androidx.lifecycle.runtime)
     implementation(libs.androidx.lifecycle.viewmodel)
     implementation(libs.androidx.documentfile)
