@@ -29,7 +29,11 @@
 
     <!-- Windows -->
     <string name="windows_title">Environnement Windows</string>
+<<<<<<< HEAD
     <string name="windows_install_wine">Initialiser Wine</string>
+=======
+    <string name="windows_install_wine">Installer Wine</string>
+>>>>>>> 5657826d0e16b81cb87f9483952d3a71c90a152a
     <string name="windows_run_exe">Exécuter un .exe</string>
 
     <!-- Tor -->
@@ -38,7 +42,10 @@
     <string name="tor_missing">Orbot non installé</string>
     <string name="tor_running">Tor actif ✅</string>
     <string name="tor_stopped">Tor arrêté</string>
+<<<<<<< HEAD
     <string name="tor_starting">Démarrage de Tor…</string>
+=======
+>>>>>>> 5657826d0e16b81cb87f9483952d3a71c90a152a
     <string name="tor_enable">Activer Tor</string>
     <string name="tor_disable">Désactiver Tor</string>
     <string name="tor_install_orbot">Installer Orbot</string>
@@ -56,7 +63,11 @@
     <!-- Localisation -->
     <string name="location_title">Localisation</string>
     <string name="location_mock_enable">Activer la fausse position</string>
+<<<<<<< HEAD
     <string name="location_mock_disable">Fausse position inactive</string>
+=======
+    <string name="location_mock_disable">Désactiver</string>
+>>>>>>> 5657826d0e16b81cb87f9483952d3a71c90a152a
     <string name="location_guide">Guide d\'activation</string>
 
     <!-- Paramètres -->
