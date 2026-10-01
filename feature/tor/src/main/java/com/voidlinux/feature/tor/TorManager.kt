@@ -127,6 +127,6 @@ class TorManager(private val context: Context) {
         receiverRegistered = false
     }
 
-    /** Retourne le port SOCKS actuel */
-    fun getSocksPort(): Int = orbotHelper.orchimenabledport()
+    /** Retourne le port SOCKS actuel (par défaut 9050) */
+fun getSocksPort(): Int = 9050
 }
