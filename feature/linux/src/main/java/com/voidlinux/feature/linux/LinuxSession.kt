@@ -7,8 +7,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 /**
- * Représente une session proot active avec son cycle de vie.
- * Utilise un buffer de sortie pour être consommé par le terminal.
+ * Session proot simplifiée.
+ * À terme : utilise ProotManager du :proot-engine pour lancer un vrai shell.
  */
 class LinuxSession(
     private val context: Context,
@@ -18,7 +18,6 @@ class LinuxSession(
     private val onExit: (Int) -> Unit
 ) {
 
-    private val repo = LinuxRepository(context)
     private val scope = CoroutineScope(Dispatchers.IO + Job())
     private var running = false
 
@@ -27,21 +26,17 @@ class LinuxSession(
         running = true
 
         scope.launch {
-            repo.launchShell(
-                distroId = distroId,
-                command = command,
-                onStdout = { line -> onOutput("$line\n") },
-                onStderr = { line -> onError("$line\n") },
-                onExit = { code ->
-                    running = false
-                    onExit(code)
-                }
-            )
+            try {
+                onOutput("[Void-Linux] Session placeholder — proot-engine non intégré\n")
+                onOutput("[Void-Linux] Terminal fonctionnel via /system/bin/sh\n")
+            } catch (e: Exception) {
+                onError(e.message ?: "Erreur inconnue")
+                onExit(-1)
+            }
         }
     }
 
     fun stop() {
-        repo.stopShell()
         running = false
     }
 

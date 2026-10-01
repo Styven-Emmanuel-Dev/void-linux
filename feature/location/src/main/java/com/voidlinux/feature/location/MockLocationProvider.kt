@@ -47,7 +47,7 @@ class MockLocationProvider(private val context: Context) {
                 providerName,
                 false, false, false, false,
                 true, true, true,
-                PowerManager.PROVIDER_POWER_ON,
+                1,
                 1
             )
             lm.setTestProviderEnabled(providerName, true)
