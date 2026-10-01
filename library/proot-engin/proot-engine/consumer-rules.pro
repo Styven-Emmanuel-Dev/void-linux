@@ -1,0 +1,4 @@
+-keep class io.oonid.proot.engine.** { *; }
+-keep interface io.oonid.proot.engine.ProotHost { *; }
+-keep class io.oonid.proot.engine.ProotConfig { *; }
+-keep class io.oonid.proot.engine.ProotConfig$* { *; }

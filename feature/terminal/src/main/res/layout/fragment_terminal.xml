@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/void_background">
+
+    <!-- Barre d'état haut -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="@dimen/space_s"
+        android:background="@color/void_surface">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="void@linux:~#"
+            android:textColor="@color/void_accent"
+            android:textSize="12sp"
+            android:fontFamily="monospace" />
+
+        <Button
+            android:id="@+id/keyStart"
+            style="@style/VoidButton.Outlined"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:paddingHorizontal="12dp"
+            android:text="Démarrer"
+            android:textSize="11sp" />
+
+        <Button
+            android:id="@+id/keyStop"
+            style="@style/VoidButton.Outlined"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:layout_marginStart="@dimen/space_xs"
+            android:paddingHorizontal="12dp"
+            android:text="Stop"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+    <!-- Vue terminal -->
+    <com.voidlinux.feature.terminal.TerminalView
+        android:id="@+id/terminalView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- Barre touches spéciales -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/void_surface"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="@dimen/space_xs">
+
+            <Button android:id="@+id/keyEsc"
+                style="@style/VoidButton.Outlined"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:text="ESC"
+                android:textSize="11sp" />
+
+            <Button android:id="@+id/keyTab"
+                style="@style/VoidButton.Outlined"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginStart="4dp"
+                android:text="TAB"
+                android:textSize="11sp" />
+
+            <Button android:id="@+id/keyCtrl"
+                style="@style/VoidButton.Outlined"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginStart="4dp"
+                android:text="CTRL"
+                android:textSize="11sp" />
+
+            <Button android:id="@+id/keyUp"
+                style="@style/VoidButton.Outlined"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginStart="4dp"
+                android:text="↑"
+                android:textSize="14sp" />
+
+            <Button android:id="@+id/keyDown"
+                style="@style/VoidButton.Outlined"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginStart="4dp"
+                android:text="↓"
+                android:textSize="14sp" />
+
+            <Button android:id="@+id/keyLeft"
+                style="@style/VoidButton.Outlined"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginStart="4dp"
+                android:text="←"
+                android:textSize="14sp" />
+
+            <Button android:id="@+id/keyRight"
+                style="@style/VoidButton.Outlined"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginStart="4dp"
+                android:text="→"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </HorizontalScrollView>
+</LinearLayout>

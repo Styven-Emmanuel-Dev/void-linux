@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/terminalFragment" android:title="Terminal" />
+    <item android:id="@+id/linuxFragment" android:title="Linux" />
+    <item android:id="@+id/torFragment" android:title="Tor" />
+    <item android:id="@+id/securityFragment" android:title="Sécurité" />
+    <item android:id="@+id/settingsFragment" android:title="Réglages" />
+</menu>

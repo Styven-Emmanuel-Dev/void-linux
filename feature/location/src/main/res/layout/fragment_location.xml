@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/void_background"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/space_l">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/location_title"
+            android:textColor="@color/void_text"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="@dimen/space_m"
+            android:background="@color/void_divider" />
+
+        <TextView
+            android:id="@+id/statusText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_m"
+            android:text="@string/location_mock_disable"
+            style="@style/VoidText.Body" />
+
+        <TextView
+            android:id="@+id/coordsText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_xs"
+            android:text="0.000000, 0.000000"
+            android:fontFamily="monospace"
+            style="@style/VoidText.Dim" />
+
+        <TextView
+            android:id="@+id/rootedWarning"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_m"
+            android:padding="@dimen/space_s"
+            android:background="@color/void_surface_variant"
+            android:text="⚠ Appareil rooté détecté"
+            android:textColor="@color/void_warning"
+            android:textSize="12sp"
+            android:visibility="gone" />
+
+        <com.google.android.material.card.MaterialCardView
+            style="@style/VoidCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_m">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/space_m">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Position prédéfinie"
+                    style="@style/VoidText.Dim" />
+
+                <Spinner
+                    android:id="@+id/presetSpinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_s"
+                    android:backgroundTint="@color/void_accent" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/applyPreset"
+                    style="@style/VoidButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_s"
+                    android:text="Appliquer la position" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            style="@style/VoidCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_m">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/space_m">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Position personnalisée"
+                    style="@style/VoidText.Dim" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="@dimen/space_s">
+
+                    <EditText
+                        android:id="@+id/latInput"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="Latitude"
+                        android:inputType="numberDecimal|numberSigned"
+                        android:textColor="@color/void_text"
+                        android:textColorHint="@color/void_text_dim"
+                        android:textSize="13sp" />
+
+                    <EditText
+                        android:id="@+id/lonInput"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="@dimen/space_s"
+                        android:hint="Longitude"
+                        android:inputType="numberDecimal|numberSigned"
+                        android:textColor="@color/void_text"
+                        android:textColorHint="@color/void_text_dim"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/customApply"
+                    style="@style/VoidButton.Outlined"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_s"
+                    android:text="Appliquer" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/toggleMock"
+            style="@style/VoidButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_l"
+            android:text="@string/location_mock_enable" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/openSettings"
+            style="@style/VoidButton.Outlined"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_s"
+            android:text="Paramètres de localisation" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/openDevOptions"
+            style="@style/VoidButton.Outlined"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_s"
+            android:text="Options développeur (mock)" />
+
+    </LinearLayout>
+</ScrollView>

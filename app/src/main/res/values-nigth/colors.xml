@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Le thème Void-Linux est déjà sombre par défaut.
+         Ce fichier garantit la cohérence si le système est en mode nuit. -->
+    <color name="void_background">#FF050508</color>
+    <color name="void_surface">#FF0D0D12</color>
+    <color name="void_text">#FFE6E6E6</color>
+    <color name="void_accent">#FF00FF88</color>
+</resources>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="security_title">Sécurité</string>
+    <string name="security_guard_active">Surveillance active</string>
+    <string name="security_guard_inactive">Surveillance inactive</string>
+    <string name="security_alert_apk">APK détecté : %1$s</string>
+    <string name="security_trust">Faire confiance</string>
+    <string name="security_block">Bloquer</string>
+    <string name="security_scan">Scanner</string>
+</resources>

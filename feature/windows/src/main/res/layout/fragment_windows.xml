@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/void_background"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/space_l">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/windows_title"
+            android:textColor="@color/void_text"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="@dimen/space_m"
+            android:background="@color/void_divider" />
+
+        <TextView
+            android:id="@+id/statusText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_m"
+            style="@style/VoidText.Body" />
+
+        <TextView
+            android:id="@+id/archText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_xs"
+            style="@style/VoidText.Dim" />
+
+        <com.google.android.material.card.MaterialCardView
+            style="@style/VoidCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_m">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/space_m">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Préfixe Wine"
+                    style="@style/VoidText.Title" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/initWine"
+                    style="@style/VoidButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_s"
+                    android:text="@string/windows_install_wine" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/cleanWine"
+                    style="@style/VoidButton.Outlined"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_s"
+                    android:text="Nettoyer le préfixe" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/runExe"
+            style="@style/VoidButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_m"
+            android:text="@string/windows_run_exe" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/stopExecution"
+            style="@style/VoidButton.Outlined"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_s"
+            android:text="Arrêter l'exécution" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_l"
+            android:text="Sortie"
+            style="@style/VoidText.Dim" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="240dp"
+            android:layout_marginTop="@dimen/space_s"
+            android:background="@color/term_background"
+            android:padding="@dimen/space_s">
+
+            <TextView
+                android:id="@+id/outputText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:textColor="@color/term_foreground"
+                android:textSize="11sp" />
+        </ScrollView>
+
+    </LinearLayout>
+</ScrollView>

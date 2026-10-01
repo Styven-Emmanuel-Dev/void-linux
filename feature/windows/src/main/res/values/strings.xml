@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="windows_title">Environnement Windows</string>
+    <string name="windows_install_wine">Initialiser Wine</string>
+    <string name="windows_run_exe">Exécuter un .exe</string>
+</resources>
