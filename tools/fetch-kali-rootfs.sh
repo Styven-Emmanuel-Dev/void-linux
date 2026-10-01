@@ -1,39 +1,63 @@
 #!/bin/bash
-# Télécharge le rootfs Kali NetHunter.
+# Télécharge un rootfs Kali et vérifie son SHA-256 avant de le conserver.
+# Usage: fetch-kali-rootfs.sh <arm64|armhf> <output_dir> [expected_sha256]
 
-set -e
+set -euo pipefail
 
 ARCH="${1:-arm64}"
 OUTPUT_DIR="${2:-app/src/main/assets}"
-
 case "$ARCH" in
     arm64)
         URL="https://kali.download/nethunter-images/current/rootfs/kali-nethunter-rootfs-minimal-arm64.tar.xz"
         FILENAME="kali-arm64.tar.xz"
+        DEFAULT_SHA256="54d0387bfd011a9d2a81286b2442dddb79464dee49260aeaabec2280f53b2578"
         ;;
     armhf)
         URL="https://kali.download/nethunter-images/current/rootfs/kali-nethunter-rootfs-minimal-armhf.tar.xz"
         FILENAME="kali-armhf.tar.xz"
+        DEFAULT_SHA256="bb770de8c99178aae2a4aca0e29f9fa7f9dbdf3fadd1da6d0d3724e030a6fd91"
         ;;
     *)
-        echo "[!] Architecture inconnue : $ARCH"
-        echo "[i] Utilise 'arm64' ou 'armhf'"
+        echo "[!] Architecture inconnue : $ARCH" >&2
         exit 1
         ;;
 esac
 
+EXPECTED_SHA256="${3:-${KALI_ROOTFS_SHA256:-$DEFAULT_SHA256}}"
+
+if [[ ! "$EXPECTED_SHA256" =~ ^[0-9a-fA-F]{64}$ ]]; then
+    echo "[!] SHA-256 invalide : 64 caractères hexadécimaux attendus." >&2
+    exit 1
+fi
+
 mkdir -p "$OUTPUT_DIR"
+DEST="$OUTPUT_DIR/$FILENAME"
+TMP="$DEST.part"
 
-if [ -f "$OUTPUT_DIR/$FILENAME" ]; then
-    echo "[i] $FILENAME existe déjà, skip."
-    exit 0
+if [[ -f "$DEST" ]]; then
+    ACTUAL="$(sha256sum "$DEST" | awk '{print $1}')"
+    if [[ "$ACTUAL" == "${EXPECTED_SHA256,,}" ]]; then
+        echo "[✓] $FILENAME existe et son SHA-256 correspond."
+        exit 0
+    fi
+    echo "[!] $FILENAME existe mais son SHA-256 ne correspond pas. Suppression." >&2
+    rm -f "$DEST"
 fi
 
+rm -f "$TMP"
 echo "[*] Téléchargement de $FILENAME depuis Kali…"
-if curl -L --fail --retry 3 -o "$OUTPUT_DIR/$FILENAME" "$URL"; then
-    echo "[✓] Rootfs téléchargé : $OUTPUT_DIR/$FILENAME"
-    echo "[i] Taille : $(du -h "$OUTPUT_DIR/$FILENAME" | cut -f1)"
-else
-    echo "[!] Échec du téléchargement — le build continuera sans rootfs."
-    exit 0
+curl --proto '=https' --tlsv1.2 --fail --location --show-error --silent \
+    --retry 3 --retry-all-errors --output "$TMP" "$URL"
+
+ACTUAL="$(sha256sum "$TMP" | awk '{print $1}')"
+if [[ "$ACTUAL" != "${EXPECTED_SHA256,,}" ]]; then
+    echo "[!] Échec de vérification SHA-256." >&2
+    echo "    Attendu : ${EXPECTED_SHA256,,}" >&2
+    echo "    Reçu    : $ACTUAL" >&2
+    rm -f "$TMP"
+    exit 1
 fi
+
+mv "$TMP" "$DEST"
+echo "[✓] Rootfs téléchargé et vérifié : $DEST"
+echo "[i] Taille : $(du -h "$DEST" | cut -f1)"
