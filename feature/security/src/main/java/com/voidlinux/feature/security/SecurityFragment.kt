@@ -6,9 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.voidlinux.core.designsystem.Components
 import com.voidlinux.feature.security.databinding.FragmentSecurityBinding
+import kotlinx.coroutines.launch
 
 class SecurityFragment : Fragment() {
 
@@ -38,21 +40,19 @@ class SecurityFragment : Fragment() {
         binding.scanNow.setOnClickListener { viewModel.runManualScan() }
         binding.clearEvents.setOnClickListener { viewModel.clearEvents() }
 
-        observeState()
-    }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.uiState.collect { state ->
+                binding.statusText.text = state.statusMessage
+                binding.toggleMonitoring.text =
+                    if (state.monitoring) "Arrêter la surveillance"
+                    else "Démarrer la surveillance"
 
-    private fun observeState() {
-        viewModel.uiState.observe(viewLifecycleOwner) { state ->
-            binding.statusText.text = state.statusMessage
-            binding.toggleMonitoring.text =
-                if (state.monitoring) "Arrêter la surveillance"
-                else "Démarrer la surveillance"
+                adapter.submit(state.events)
 
-            adapter.submit(state.events)
-
-            state.errorMessage?.let {
-                Components.showSnackLong(binding.root, it)
-                viewModel.clearError()
+                state.errorMessage?.let {
+                    Components.showSnackLong(binding.root, it)
+                    viewModel.clearError()
+                }
             }
         }
     }

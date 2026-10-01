@@ -9,8 +9,10 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.voidlinux.core.designsystem.Components
 import com.voidlinux.feature.settings.databinding.FragmentSettingsBinding
+import kotlinx.coroutines.launch
 
 class SettingsFragment : Fragment() {
 
@@ -31,35 +33,27 @@ class SettingsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.openPermissions.setOnClickListener {
-            viewModel.openAllPermissions()
-        }
+        binding.openPermissions.setOnClickListener { viewModel.openAllPermissions() }
+        binding.refresh.setOnClickListener { viewModel.refresh() }
 
-        binding.refresh.setOnClickListener {
-            viewModel.refresh()
-        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.uiState.collect { state ->
+                renderPermissions(state.permissions)
+                renderSteps(state.steps)
 
-        observeState()
-    }
-
-    private fun observeState() {
-        viewModel.uiState.observe(viewLifecycleOwner) { state ->
-            renderPermissions(state.permissions)
-            renderSteps(state.steps)
-
-            state.errorMessage?.let {
-                Components.showSnackLong(binding.root, it)
-                viewModel.clearMessages()
+                state.errorMessage?.let {
+                    Components.showSnackLong(binding.root, it)
+                    viewModel.clearMessages()
+                }
             }
         }
     }
 
     private fun renderPermissions(list: List<PermissionManager.PermissionStatus>) {
         binding.permissionsContainer.removeAllViews()
-
         list.forEach { perm ->
             val tv = TextView(requireContext()).apply {
-                text = "${if (perm.granted) "✅" else "❌"}  ${perm.name}"
+                text = "${if (perm.granted) "OK" else "X"}  ${perm.name}"
                 setTextColor(
                     if (perm.granted)
                         ContextCompat.getColor(requireContext(), R.color.void_accent)
@@ -75,7 +69,6 @@ class SettingsFragment : Fragment() {
 
     private fun renderSteps(steps: List<HardeningGuide.HardeningStep>) {
         binding.stepsContainer.removeAllViews()
-
         steps.forEach { step ->
             val layout = LinearLayout(requireContext()).apply {
                 orientation = LinearLayout.VERTICAL
@@ -84,22 +77,18 @@ class SettingsFragment : Fragment() {
                 isFocusable = true
                 setOnClickListener { viewModel.runStep(step) }
             }
-
             val title = TextView(requireContext()).apply {
                 text = step.title
                 setTextColor(ContextCompat.getColor(requireContext(), R.color.void_text))
                 textSize = 15f
             }
-
             val desc = TextView(requireContext()).apply {
                 text = step.description
                 setTextColor(ContextCompat.getColor(requireContext(), R.color.void_text_dim))
                 textSize = 12f
             }
-
             layout.addView(title)
             layout.addView(desc)
-
             binding.stepsContainer.addView(layout)
         }
     }

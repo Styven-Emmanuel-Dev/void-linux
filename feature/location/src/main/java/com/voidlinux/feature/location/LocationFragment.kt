@@ -7,8 +7,10 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.voidlinux.core.designsystem.Components
 import com.voidlinux.feature.location.databinding.FragmentLocationBinding
+import kotlinx.coroutines.launch
 
 class LocationFragment : Fragment() {
 
@@ -36,19 +38,11 @@ class LocationFragment : Fragment() {
             presets
         )
 
-        binding.presetSpinner.setSelection(
-            presets.indexOf(viewModel.uiState.value.presetName).coerceAtLeast(0)
-        )
-
         binding.applyPreset.setOnClickListener {
             val name = binding.presetSpinner.selectedItem as? String ?: return@setOnClickListener
             viewModel.applyPreset(name)
         }
-
-        binding.toggleMock.setOnClickListener {
-            viewModel.toggleMock()
-        }
-
+        binding.toggleMock.setOnClickListener { viewModel.toggleMock() }
         binding.customApply.setOnClickListener {
             val lat = binding.latInput.text.toString().toDoubleOrNull()
             val lon = binding.lonInput.text.toString().toDoubleOrNull()
@@ -58,28 +52,23 @@ class LocationFragment : Fragment() {
             }
             viewModel.setCustomLocation(lat, lon)
         }
-
         binding.openSettings.setOnClickListener { viewModel.openLocationSettings() }
         binding.openDevOptions.setOnClickListener { viewModel.openMockSettings() }
 
-        observeState()
-    }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.uiState.collect { state ->
+                binding.statusText.text = state.statusMessage
+                binding.toggleMock.text =
+                    if (state.active) "Désactiver la fausse position"
+                    else "Activer la fausse position"
+                binding.coordsText.text = "%.6f, %.6f".format(state.currentLat, state.currentLon)
+                binding.rootedWarning.visibility =
+                    if (state.deviceRooted) View.VISIBLE else View.GONE
 
-    private fun observeState() {
-        viewModel.uiState.observe(viewLifecycleOwner) { state ->
-            binding.statusText.text = state.statusMessage
-            binding.toggleMock.text =
-                if (state.active) "Désactiver la fausse position"
-                else "Activer la fausse position"
-
-            binding.coordsText.text = "%.6f, %.6f".format(state.currentLat, state.currentLon)
-
-            binding.rootedWarning.visibility =
-                if (state.deviceRooted) View.VISIBLE else View.GONE
-
-            state.errorMessage?.let {
-                Components.showSnackLong(binding.root, it)
-                viewModel.clearError()
+                state.errorMessage?.let {
+                    Components.showSnackLong(binding.root, it)
+                    viewModel.clearError()
+                }
             }
         }
     }
