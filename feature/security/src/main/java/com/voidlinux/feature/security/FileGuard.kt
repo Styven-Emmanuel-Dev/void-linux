@@ -5,12 +5,7 @@ import android.os.FileObserver
 import com.voidlinux.core.common.Logger
 import java.io.File
 
-/**
- * Surveille un répertoire et signale tout fichier suspect :
- * - APK nouvellement créé
- * - scripts exécutables (.sh, .bin, .dex, .so)
- * - archives inattendues
- */
+/** Surveille un répertoire et déclenche une analyse prudente des nouveaux fichiers. */
 class FileGuard(
     private val context: Context,
     private val watchDir: File,
@@ -21,19 +16,18 @@ class FileGuard(
     private val scanner = ApkScanner(context)
 
     fun start() {
-        if (!watchDir.exists()) {
-            watchDir.mkdirs()
+        if (!watchDir.exists() && !watchDir.mkdirs()) {
+            Logger.e("Impossible de créer ${watchDir.absolutePath}", IllegalStateException("mkdirs failed"))
+            return
         }
+        if (!watchDir.isDirectory) return
 
-        observer = object : FileObserver(
-            watchDir,
-            CREATE or MOVED_TO or CLOSE_WRITE
-        ) {
+        observer?.stopWatching()
+        observer = object : FileObserver(watchDir, CREATE or MOVED_TO or CLOSE_WRITE) {
             override fun onEvent(event: Int, path: String?) {
                 path ?: return
                 val file = File(watchDir, path)
-                if (!file.isFile) return
-                handleFile(file)
+                if (file.isFile) handleFile(file)
             }
         }.also { it.startWatching() }
 
@@ -47,9 +41,7 @@ class FileGuard(
     }
 
     private fun handleFile(file: File) {
-        val ext = file.extension.lowercase()
-
-        when (ext) {
+        when (file.extension.lowercase()) {
             "apk" -> handleApk(file)
             "sh", "bin", "dex", "so" -> handleExecutable(file)
             "zip", "tar", "gz", "xz" -> handleArchive(file)
@@ -61,9 +53,9 @@ class FileGuard(
             onEvent(
                 SecurityEvent(
                     type = SecurityEvent.EventType.APK_DETECTED,
-                    severity = SecurityEvent.Severity.HIGH,
-                    title = "APK illisible",
-                    description = "Le fichier ${file.name} n'a pas pu être analysé",
+                    severity = SecurityEvent.Severity.MEDIUM,
+                    title = "APK non analysable",
+                    description = "${file.name} n'a pas pu être analysé. Ne pas l'interpréter automatiquement comme malveillant.",
                     filePath = file.absolutePath
                 )
             )
@@ -71,28 +63,25 @@ class FileGuard(
         }
 
         val sensitive = scanner.findSensitivePermissions(info.permissions)
+        if (info.trusted) return
 
-        if (!info.trusted) {
-            onEvent(
-                SecurityEvent(
-                    type = SecurityEvent.EventType.APK_UNTRUSTED,
-                    severity = if (sensitive.isNotEmpty())
-                        SecurityEvent.Severity.CRITICAL
-                    else SecurityEvent.Severity.HIGH,
-                    title = "APK non signé de confiance",
-                    description = buildString {
-                        append("${file.name}\n")
-                        append("Package : ${info.packageName}\n")
-                        if (sensitive.isNotEmpty()) {
-                            append("⚠ Permissions sensibles : ")
-                            append(sensitive.joinToString { it.substringAfterLast('.') })
-                        }
-                    },
-                    packageName = info.packageName,
-                    filePath = file.absolutePath
-                )
+        onEvent(
+            SecurityEvent(
+                type = SecurityEvent.EventType.APK_UNTRUSTED,
+                severity = if (sensitive.isNotEmpty()) SecurityEvent.Severity.MEDIUM else SecurityEvent.Severity.LOW,
+                title = "APK à vérifier",
+                description = buildString {
+                    append("${file.name}\nPackage : ${info.packageName}\n")
+                    append("Signature inconnue ou non présente dans la liste de confiance.\n")
+                    if (sensitive.isNotEmpty()) {
+                        append("Permissions sensibles : ")
+                        append(sensitive.joinToString { it.substringAfterLast('.') })
+                    }
+                },
+                packageName = info.packageName,
+                filePath = file.absolutePath
             )
-        }
+        )
     }
 
     private fun handleExecutable(file: File) {
