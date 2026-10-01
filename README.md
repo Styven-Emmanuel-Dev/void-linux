@@ -1,9 +1,6 @@
 # void-linux
 Terminal Linux On Android 
 
-Voici tout ce qu'il te faut pour le build GitHub Actions, la publication automatique, et le README complet.
-
-
 <p align="center">
   <img src="void-linux-git.png" alt="Void-Linux" width="100%" />
 </p>
@@ -100,13 +97,13 @@ professionnels de la sécurité.
 ### Téléchargement direct
 
 Récupère la dernière version depuis
-[**Releases**](https://github.com/VOTRE_USER/Void-Linux/releases).
+[**Releases**](https://github.com/Wazestudio/void-Linux/releases).
 
 ### Compilation depuis les sources
 
 ```bash
 # Clone
-git clone https://github.com/VOTRE_USER/Void-Linux.git
+git clone https://github.com/Wazestudio/void-Linux.git
 cd Void-Linux
 
 # Génère les icônes mipmap
