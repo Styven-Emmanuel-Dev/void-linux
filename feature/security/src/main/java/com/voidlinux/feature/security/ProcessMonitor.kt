@@ -1,73 +1,77 @@
 package com.voidlinux.feature.security
 
-import android.app.ActivityManager
+import android.app.usage.UsageStatsManager
 import android.content.Context
 import com.voidlinux.core.common.Logger
 
 /**
- * Détecte les services et processus suspects.
- * Sans root : on se limite à ActivityManager.getRunningServices.
+ * Android moderne ne permet pas à une application classique d'énumérer librement
+ * les processus/services des autres applications. getRunningServices() ne doit
+ * donc pas être présenté comme un processus scanner.
+ *
+ * Cette classe fournit à la place les applications récemment utilisées lorsque
+ * l'utilisateur a accordé l'accès aux statistiques d'utilisation.
  */
 class ProcessMonitor(private val context: Context) {
 
-    private val am: ActivityManager =
-        context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+    private val usageStats: UsageStatsManager? =
+        context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
 
-    data class RunningServiceInfo(
+    data class RecentAppUsage(
         val packageName: String,
-        val className: String,
-        val foreground: Boolean,
-        val pid: Int
+        val lastTimeUsed: Long,
+        val totalTimeForegroundMs: Long
     )
 
-    fun getRunningServices(): List<RunningServiceInfo> {
+    fun getRecentApps(windowMs: Long = 60 * 60 * 1000L): List<RecentAppUsage> {
+        val manager = usageStats ?: return emptyList()
+        val now = System.currentTimeMillis()
+        val begin = now - windowMs.coerceAtLeast(1_000L)
+
         return try {
-            @Suppress("DEPRECATION")
-            am.getRunningServices(200).map { s ->
-                RunningServiceInfo(
-                    packageName = s.service.packageName,
-                    className = s.service.className,
-                    foreground = s.foreground,
-                    pid = s.pid
-                )
-            }
+            manager.queryUsageStats(
+                UsageStatsManager.INTERVAL_DAILY,
+                begin,
+                now
+            ).orEmpty()
+                .filter { it.totalTimeInForeground > 0L }
+                .sortedByDescending { it.lastTimeUsed }
+                .map {
+                    RecentAppUsage(
+                        packageName = it.packageName,
+                        lastTimeUsed = it.lastTimeUsed,
+                        totalTimeForegroundMs = it.totalTimeInForeground
+                    )
+                }
+        } catch (e: SecurityException) {
+            Logger.e("Accès aux statistiques d'utilisation refusé", e)
+            emptyList()
         } catch (e: Exception) {
-            Logger.e("Erreur ProcessMonitor", e)
+            Logger.e("Erreur UsageStats", e)
             emptyList()
         }
     }
 
     /**
-     * Détecte les services en arrière-plan suspects (ceux qui ne
-     * devraient pas tourner en permanence).
+     * Ne génère plus de faux positifs à partir de services Android inconnus.
+     * L'appelant peut utiliser cette méthode pour vérifier que l'accès Usage Stats
+     * fonctionne et afficher les applications récemment utilisées.
      */
     fun detectSuspicious(
         knownServices: Set<String>,
         onEvent: (SecurityEvent) -> Unit
     ) {
-        val services = getRunningServices()
+        @Suppress("UNUSED_VARIABLE")
+        val ignored = knownServices
+        val apps = getRecentApps()
+        if (apps.isEmpty()) return
 
-        services.forEach { svc ->
-            val key = "${svc.packageName}/${svc.className}"
-            if (key !in knownServices && !svc.foreground) {
-                onEvent(
-                    SecurityEvent(
-                        type = SecurityEvent.EventType.PROCESS_SUSPICIOUS,
-                        severity = SecurityEvent.Severity.LOW,
-                        title = "Service en arrière-plan",
-                        description = key,
-                        packageName = svc.packageName
-                    )
-                )
-            }
-        }
+        // Aucun événement de menace n'est créé ici : l'usage récent n'est pas une preuve
+        // de comportement malveillant. L'UI peut afficher les applications comme information.
+        Logger.d("${apps.size} applications récemment utilisées détectées")
     }
 
     companion object {
-        /** Liste des services connus et approuvés par défaut */
-        val DEFAULT_KNOWN = setOf(
-            "com.android.systemui/.SystemUIService",
-            "com.android.settings/.Settings\$BatteryService"
-        )
+        val DEFAULT_KNOWN: Set<String> = emptySet()
     }
 }

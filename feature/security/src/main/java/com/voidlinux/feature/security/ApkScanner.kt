@@ -7,10 +7,10 @@ import java.io.File
 import java.security.MessageDigest
 
 /**
- * Analyse un APK :
- * - calcule la signature SHA-256
- * - vérifie la liste blanche
- * - détecte les permissions sensibles
+ * Analyse un APK sans l'installer.
+ *
+ * Important : une signature inconnue n'est pas synonyme de malware. Elle signifie
+ * simplement qu'elle ne figure pas dans la liste de confiance locale.
  */
 class ApkScanner(private val context: Context) {
 
@@ -25,33 +25,41 @@ class ApkScanner(private val context: Context) {
     )
 
     fun scan(apk: File): ApkInfo? {
-        if (!apk.exists()) return null
+        if (!apk.isFile || !apk.canRead()) return null
 
-        val info = pm.getPackageArchiveInfo(
-            apk.absolutePath,
-            PackageManager.GET_SIGNATURES or PackageManager.GET_PERMISSIONS
-        ) ?: return null
+        val info = try {
+            pm.getPackageArchiveInfo(
+                apk.absolutePath,
+                PackageManager.GET_SIGNING_CERTIFICATES or PackageManager.GET_PERMISSIONS
+            )
+        } catch (e: Exception) {
+            Logger.e("Impossible d'analyser l'APK", e)
+            return null
+        } ?: return null
 
-        val hash = info.signatures?.firstOrNull()?.let {
-            val digest = MessageDigest.getInstance("SHA-256")
-            digest.digest(it.toByteArray()).joinToString("") { b -> "%02x".format(b) }
+        // Depuis API 28, GET_SIGNATURES est déprécié. API min = 29 pour ce module.
+        val signers = info.signingInfo?.apkContentsSigners.orEmpty()
+        val hashes = signers.map { certificate ->
+            sha256(certificate.toByteArray())
         }
-
-        val perms = info.requestedPermissions?.toList() ?: emptyList()
-        val trusted = hash != null && TrustedSignatures.ALL.contains(hash)
+        val primaryHash = hashes.firstOrNull()
+        val trusted = primaryHash?.let(TrustedSignatures::isTrusted) == true
 
         return ApkInfo(
             packageName = info.packageName,
             versionName = info.versionName,
-            signatureSha256 = hash,
-            permissions = perms,
+            signatureSha256 = primaryHash,
+            permissions = info.requestedPermissions?.toList().orEmpty(),
             trusted = trusted
         )
     }
 
-    /**
-     * Liste des permissions considérées comme sensibles.
-     */
+    private fun sha256(bytes: ByteArray): String =
+        MessageDigest.getInstance("SHA-256")
+            .digest(bytes)
+            .joinToString("") { byte -> "%02x".format(byte.toInt() and 0xff) }
+
+    /** Liste les permissions sensibles à présenter à l'utilisateur. */
     fun findSensitivePermissions(perms: List<String>): List<String> =
         perms.filter { it in SENSITIVE_PERMISSIONS }
 

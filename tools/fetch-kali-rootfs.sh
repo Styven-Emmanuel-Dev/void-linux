@@ -29,7 +29,6 @@ fi
 echo "[*] Téléchargement de $FILENAME depuis Kali..."
 if curl -L --fail --retry 3 -o "$OUTPUT_DIR/$FILENAME" "$URL"; then
     echo "[✓] Rootfs téléchargé : $OUTPUT_DIR/$FILENAME"
-    echo "[i] Taille : $(du -h "$OUTPUT_DIR/$FILENAME" | cut -f1)"
 else
     echo "[!] Échec du téléchargement — le build continuera sans rootfs."
     exit 0

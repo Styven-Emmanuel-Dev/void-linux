@@ -16,7 +16,6 @@ jobs:
   build:
     name: Build APK
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -38,81 +37,63 @@ jobs:
           log-accepted-android-sdk-licenses: false
           packages: 'platform-tools platforms;android-34 build-tools;34.0.0'
 
+      # Remplacement de l'action Gradle obsolète et de la gestion manuelle du cache
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: 8.7
-
-      - name: Cache Gradle
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: gradle-${{ runner.os }}-
 
       - name: Cache CMake build
         uses: actions/cache@v4
         with:
           path: core/native/.cxx
           key: cmake-${{ runner.os }}-${{ hashFiles('core/native/**/*.c', 'core/native/**/*.cpp', 'core/native/CMakeLists.txt') }}
+          restore-keys: |
+            cmake-${{ runner.os }}-
 
       - name: Generate mipmap icons
         run: |
           if [ -f tools/generate-mipmaps.sh ]; then
             bash tools/generate-mipmaps.sh
           else
-            echo "Pas de script generate-mipmaps.sh — skip"
+            echo "::warning::Pas de script generate-mipmaps.sh — skip"
           fi
 
       - name: Download Kali rootfs
         run: |
           if [ -f tools/fetch-kali-rootfs.sh ]; then
-            bash tools/fetch-kali-rootfs.sh arm64 app/src/main/assets || echo "Rootfs skip"
+            # Utilisation de set -e pour interrompre en cas d'erreur critique
+            set -e
+            bash tools/fetch-kali-rootfs.sh arm64 app/src/main/assets
           else
-            echo "Pas de script fetch-kali-rootfs.sh — skip"
+            echo "::warning::Pas de script fetch-kali-rootfs.sh — skip"
           fi
 
-      - name: List project files
-        run: |
-          echo "=== Structure racine ==="
-          ls -la
-          echo "=== gradle/ ==="
-          ls -la gradle/ || true
-          echo "=== Vérification des modules ==="
-          ls -d app core feature library 2>/dev/null || true
-
-      - name: Build Debug APK
-        run: gradle assembleDebug --stacktrace --no-daemon
-
-      - name: Build Release APK
-        run: gradle assembleRelease --stacktrace --no-daemon
+      # Compilation regroupée pour éviter le re-démarrage du démon Gradle
+      - name: Build APKs (Debug & Release)
+        run: ./gradlew assembleDebug assembleRelease --stacktrace --no-daemon
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
-        if: always()
         with:
           name: void-linux-debug
           path: app/build/outputs/apk/debug/*.apk
-          retention-days: 30
-          if-no-files-found: warn
+          retention-days: 7
+          if-no-files-found: error
 
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
-        if: always()
         with:
           name: void-linux-release
           path: app/build/outputs/apk/release/*.apk
-          retention-days: 30
-          if-no-files-found: warn
+          retention-days: 7
+          if-no-files-found: error
 
   release:
     name: Publish Release
     needs: build
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -125,8 +106,12 @@ jobs:
       - name: Prepare release files
         run: |
           mkdir -p release
+          # Sécurisation du transfert : lève une erreur si aucun APK n'est trouvé
           find artifacts -name "*.apk" -exec cp {} release/ \;
-          ls -la release/
+          if [ -z "$(ls -A release)" ]; then
+            echo "::error::Aucun APK trouvé pour la release !"
+            exit 1
+          fi
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -134,7 +119,6 @@ jobs:
           name: Void-Linux ${{ github.ref_name }}
           body: |
             ## Void-Linux ${{ github.ref_name }}
-
             Environnement hacker tout-en-un sur Android.
 
             ### Contenu
