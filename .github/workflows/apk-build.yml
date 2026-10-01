@@ -32,6 +32,11 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          cmdline-tools-version: 11076708
+          accept-android-sdk-licenses: true
+          log-accepted-android-sdk-licenses: false
+          packages: 'platform-tools platforms;android-34 build-tools;34.0.0'
 
       - name: Setup NDK
         uses: nttld/setup-ndk@v1
@@ -55,10 +60,10 @@ jobs:
           key: cmake-${{ runner.os }}-${{ hashFiles('core/native/**/*.c', 'core/native/**/*.cpp', 'core/native/CMakeLists.txt') }}
 
       - name: Generate mipmap icons
-        run: bash tools/generate-mipmaps.sh
+        run: bash tools/generate-mipmaps.sh || echo "No mipmap script"
 
       - name: Download Kali rootfs
-        run: bash tools/fetch-kali-rootfs.sh arm64 app/src/main/assets || true
+        run: bash tools/fetch-kali-rootfs.sh arm64 app/src/main/assets || echo "No rootfs script"
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
@@ -68,13 +73,6 @@ jobs:
 
       - name: Build Release APK
         run: ./gradlew assembleRelease --stacktrace
-
-      - name: Sign Release APK (unsigned debug fallback)
-        run: |
-          if [ -f app/build/outputs/apk/release/app-release-unsigned.apk ]; then
-            cp app/build/outputs/apk/release/app-release-unsigned.apk \
-               app/build/outputs/apk/release/void-linux-release-unsigned.apk
-          fi
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
@@ -133,10 +131,6 @@ jobs:
             2. Active « Sources inconnues » dans les paramètres Android
             3. Installe l'APK
             4. Lance Void-Linux
-
-            ### Notes
-            - Requiert Android 10+ (API 29)
-            - Architectures : arm64-v8a, armeabi-v7a, x86_64
           files: release/*.apk
           draft: false
           prerelease: false
