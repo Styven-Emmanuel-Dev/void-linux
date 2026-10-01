@@ -20,8 +20,25 @@
         <item name="android:textColorSecondary">@color/void_text_dim</item>
     </style>
 
-    <style name="Theme.VoidLinux.Splash" parent="Theme.VoidLinux">
-        <item name="android:windowBackground">@color/void_background</item>
+    <style name="VoidText">
+        <item name="android:textColor">@color/void_text</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <style name="VoidText.Title">
+        <item name="android:textColor">@color/void_text</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="VoidText.Body">
+        <item name="android:textColor">@color/void_text</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <style name="VoidText.Dim">
+        <item name="android:textColor">@color/void_text_dim</item>
+        <item name="android:textSize">13sp</item>
     </style>
 
     <style name="VoidButton" parent="Widget.Material3.Button">
@@ -44,19 +61,4 @@
         <item name="strokeWidth">1dp</item>
     </style>
 
-    <style name="VoidText.Title">
-        <item name="android:textColor">@color/void_text</item>
-        <item name="android:textSize">20sp</item>
-        <item name="android:textStyle">bold</item>
-    </style>
-
-    <style name="VoidText.Body">
-        <item name="android:textColor">@color/void_text</item>
-        <item name="android:textSize">15sp</item>
-    </style>
-
-    <style name="VoidText.Dim">
-        <item name="android:textColor">@color/void_text_dim</item>
-        <item name="android:textSize">13sp</item>
-    </style>
 </resources>
