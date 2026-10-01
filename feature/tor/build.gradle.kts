@@ -37,7 +37,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel)
     implementation(libs.kotlinx.coroutines.android)
 
-    // Guardian Project — Tor + Orbot
-    implementation(libs.netcipher)
+    // netcipher-webkit embarque déjà netcipher
     implementation(libs.netcipher.webkit)
 }
