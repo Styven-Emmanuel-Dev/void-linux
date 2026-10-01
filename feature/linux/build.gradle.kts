@@ -28,7 +28,6 @@ android {
 dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:designsystem"))
-    implementation(project(":library:proot-engine:proot-engine"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
